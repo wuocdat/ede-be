@@ -14,13 +14,14 @@ export class UsersService {
   ) {}
 
   async createOne(createUserDto: CreateUserDto) {
-    const { username, password: plainPass } = createUserDto;
+    const { username, password: plainPass, role } = createUserDto;
 
     const password = await bcrypt.hash(plainPass, saltOrRounds);
 
     return this.usersRepository.save({
       username,
       password,
+      role,
     });
   }
 

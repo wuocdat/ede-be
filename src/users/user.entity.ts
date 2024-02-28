@@ -12,8 +12,8 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ type: 'enum', enum: ERole, array: true, default: [ERole.Editor] })
-  roles: ERole[];
+  @Column({ type: 'enum', enum: ERole, default: ERole.Editor })
+  role: ERole;
 
   @Column({ default: true })
   isActive: boolean;
