@@ -3,16 +3,14 @@ import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateTranslationDto {
   @ApiProperty({
-    default: `Anăn lah mđiă yang hruê, čư̆ čhiăng, hnoh êa, êa ksĭ, angĭn, hlô mnơ̆ng, ana kyâo, rơ̆k tơ̆k, lăn, êa,…
-  `,
+    default: `Sa hlăm dŭm mta diŏ tuôm hlăm klei hdĭp aguah tlam anak mnuih drei anăn lah êa jua leh anăn wăl riêng gah.`,
   })
   @IsString()
   @IsNotEmpty()
   ede_text: string;
 
   @ApiProperty({
-    default: `Đó là ánh sáng mặt trời, núi sông, biển cả, không khí, động vật, thực vật, đất, nước,... 
-  `,
+    default: `Một trong những yếu tố có ảnh hưởng trực tiếp đến cuộc sống của chúng ta đó là nước và môi trường sống.`,
   })
   @IsString()
   @IsOptional()

@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Translation {
@@ -14,15 +20,19 @@ export class Translation {
   @Column({ default: false })
   correct: boolean;
 
-  @Column()
+  @Column({ name: 'created_by' })
   createdBy: number;
 
-  @Column()
-  createdAt: string;
+  @CreateDateColumn({
+    name: 'created_at',
+  })
+  createdAt: Date;
 
-  @Column()
+  @Column({ name: 'updated_by' })
   updatedBy: number;
 
-  @Column()
-  updatedAt: string;
+  @UpdateDateColumn({
+    name: 'updated_at',
+  })
+  updatedAt: Date;
 }
