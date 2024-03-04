@@ -101,8 +101,13 @@ export class TranslationController {
   update(
     @Param('id') id: string,
     @Body() updateTranslationDto: UpdateTranslationDto,
+    @Req() req: Request,
   ) {
-    return this.translationService.update(+id, updateTranslationDto);
+    return this.translationService.update(
+      +id,
+      updateTranslationDto,
+      req.user.id,
+    );
   }
 
   @Delete(':id')

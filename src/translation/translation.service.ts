@@ -94,8 +94,15 @@ export class TranslationService {
     return `This action returns a #${id} translation`;
   }
 
-  async update(id: number, updateTranslationDto: UpdateTranslationDto) {
-    await this.transRepository.update(id, updateTranslationDto);
+  async update(
+    id: number,
+    updateTranslationDto: UpdateTranslationDto,
+    userId: number,
+  ) {
+    await this.transRepository.update(id, {
+      ...updateTranslationDto,
+      updatedBy: userId,
+    });
 
     return {
       message: 'updated successfully',
