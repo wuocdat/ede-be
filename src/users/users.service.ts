@@ -30,6 +30,10 @@ export class UsersService {
   }
 
   async check(userId: number) {
-    return this.usersRepository.findOneBy({ id: userId });
+    const { password, ...others } = await this.usersRepository.findOneBy({
+      id: userId,
+    });
+
+    return others;
   }
 }
