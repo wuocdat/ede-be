@@ -14,6 +14,8 @@ import { Repository } from 'typeorm';
 type TransRowType = {
   ede_text: string;
   vi_text: string;
+  correct_ede_text: string | null;
+  correct?: boolean;
 };
 
 @Injectable()
@@ -58,16 +60,21 @@ export class TranslationService {
     };
   }
 
-  async parseExcelFile(file: Express.Multer.File) {
+  async parseExcelFile(file: Express.Multer.File, userId: number) {
     const workbook = new Excel.Workbook();
     await workbook.xlsx.load(file.buffer);
     const worksheet = workbook.worksheets[0];
     const parseTransList: TransRowType[] = [];
     worksheet.eachRow(function (row, rowNumber) {
-      if (rowNumber > 2 && row.cellCount >= 3) {
+      if (rowNumber > 1) {
         parseTransList.push({
-          ede_text: row.getCell(2).value.toString(),
-          vi_text: row.getCell(3).value.toString(),
+          ede_text: row.getCell(1).value?.toString() || '',
+          vi_text: row.getCell(2).value?.toString() || '',
+          correct_ede_text: row.getCell(3).value?.toString() || null,
+          correct:
+            !!row.getCell(1).value &&
+            !!row.getCell(2).value &&
+            !!row.getCell(3).value,
         });
       }
     });
@@ -75,7 +82,7 @@ export class TranslationService {
     if (parseTransList.length === 0)
       throw new BadRequestException('File không đúng định dạng hoặc rỗng.');
 
-    return parseTransList;
+    return await this.createMultipleTrans(parseTransList, userId);
   }
 
   async findIncorrectTrans() {

@@ -65,8 +65,9 @@ export class TranslationController {
       }),
     )
     file: Express.Multer.File,
+    @Req() req: Request,
   ) {
-    return await this.translationService.parseExcelFile(file);
+    return await this.translationService.parseExcelFile(file, req.user.id);
   }
 
   @Roles(ERole.Admin)

@@ -14,8 +14,11 @@ export class Translation {
   @Column()
   ede_text: string;
 
-  @Column({ nullable: true })
+  @Column()
   vi_text: string;
+
+  @Column({ nullable: true, default: null })
+  correct_ede_text: string;
 
   @Column({ default: false })
   correct: boolean;

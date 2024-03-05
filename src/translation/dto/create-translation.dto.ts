@@ -13,8 +13,13 @@ export class CreateTranslationDto {
     default: `Một trong những yếu tố có ảnh hưởng trực tiếp đến cuộc sống của chúng ta đó là nước và môi trường sống.`,
   })
   @IsString()
+  @IsNotEmpty()
+  vi_text: string;
+
+  @ApiProperty()
+  @IsString()
   @IsOptional()
-  vi_text?: string;
+  correct_ede_text?: string | null;
 
   @ApiProperty({ default: false })
   @IsBoolean()
