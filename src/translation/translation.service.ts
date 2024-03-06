@@ -10,6 +10,8 @@ import { UpdateTranslationDto } from './dto/update-translation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Translation } from './entities/translation.entity';
 import { Repository } from 'typeorm';
+import { PageDto, PageMetaDto, PageOptionsDto } from 'src/shared/dto/page.dto';
+import { AmountStatisticDto, TranslationDto } from './dto/translation.dto';
 
 type TransRowType = {
   ede_text: string;
@@ -93,8 +95,61 @@ export class TranslationService {
     };
   }
 
-  findAll() {
-    return `This action returns all translation`;
+  async findAll(
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<TranslationDto>> {
+    const queryBuilder = this.transRepository.createQueryBuilder('translation');
+
+    queryBuilder
+      .orderBy('translation.created_at', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({ pageOptionsDto, itemCount });
+
+    return new PageDto(entities, pageMetaDto);
+  }
+
+  async findAllCorrectTrans(
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<TranslationDto>> {
+    const queryBuilder = this.transRepository.createQueryBuilder('translation');
+
+    queryBuilder
+      .where('translation.correct=true')
+      .orderBy('translation.created_at', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({ pageOptionsDto, itemCount });
+
+    return new PageDto(entities, pageMetaDto);
+  }
+
+  async countAll(): Promise<number> {
+    return await this.transRepository.count();
+  }
+
+  async getAmountStatistic(): Promise<AmountStatisticDto> {
+    const allTransNum = await this.transRepository.count();
+    const correctTransNum = await this.transRepository.countBy({
+      correct: true,
+    });
+    const incorrectTransNum = await this.transRepository.countBy({
+      correct: false,
+    });
+
+    return {
+      incorrectTransNum,
+      correctTransNum,
+      allTransNum,
+    };
   }
 
   findOne(id: number) {

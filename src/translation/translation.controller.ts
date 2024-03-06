@@ -11,6 +11,7 @@ import {
   UploadedFile,
   ParseFilePipe,
   FileTypeValidator,
+  Query,
 } from '@nestjs/common';
 import { TranslationService } from './translation.service';
 import { CreateTranslationDto } from './dto/create-translation.dto';
@@ -20,6 +21,8 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/shared/decorator/roles.decorator';
 import { ERole } from 'src/shared/enums/roles.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PageDto, PageOptionsDto } from 'src/shared/dto/page.dto';
+import { AmountStatisticDto, TranslationDto } from './dto/translation.dto';
 
 @ApiTags('Translation')
 @ApiBearerAuth()
@@ -89,8 +92,27 @@ export class TranslationController {
   }
 
   @Get()
-  findAll() {
-    return this.translationService.findAll();
+  async findAll(
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<TranslationDto>> {
+    return await this.translationService.findAll(pageOptionsDto);
+  }
+
+  @Get('/all-correct-trans')
+  async findAllCorrectTrans(
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<TranslationDto>> {
+    return await this.translationService.findAllCorrectTrans(pageOptionsDto);
+  }
+
+  @Get('/count-all')
+  async countAll(): Promise<number> {
+    return await this.translationService.countAll();
+  }
+
+  @Get('/amount-statistic')
+  async getAmountStatistic(): Promise<AmountStatisticDto> {
+    return this.translationService.getAmountStatistic();
   }
 
   @Get(':id')
