@@ -141,6 +141,11 @@ export class TranslationController {
     );
   }
 
+  @Get('/yearly-correct-statistic')
+  async getYearlyCorrectTransStatistic() {
+    return this.translationService.getYearlyCorrectTransCount();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.translationService.findOne(+id);

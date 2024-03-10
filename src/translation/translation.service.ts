@@ -244,6 +244,33 @@ export class TranslationService {
     };
   }
 
+  async getYearlyCorrectTransCount() {
+    const result: any[] = [];
+    for (let i = 0; i < 12; i++) {
+      const currentMonthStatistic = await this.getMonthlyCorrectTransCount({
+        date: moment().startOf('year').add(i, 'months').format('YYYY-MM-DD'),
+      });
+
+      const editorNames = currentMonthStatistic.editors.map((editor) => ({
+        [editor.editor.username]: editor.editedSentenceCount,
+      }));
+
+      const currentMonthData = editorNames.reduce(
+        (accumulator, currentValue) => ({ ...accumulator, ...currentValue }),
+        {},
+      );
+
+      currentMonthData.total = currentMonthStatistic.total;
+
+      result.push({
+        ...currentMonthData,
+        month: moment().startOf('year').add(i, 'months').format('MMM'),
+      });
+    }
+
+    return result;
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} translation`;
   }
