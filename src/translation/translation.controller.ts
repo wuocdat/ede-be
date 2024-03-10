@@ -146,6 +146,11 @@ export class TranslationController {
     return this.translationService.getYearlyCorrectTransCount();
   }
 
+  @Get('/recent-updated-trans')
+  async getRecentUpdatedTrans(@Req() req: Request) {
+    return this.translationService.getRecentUpdatedTrans(req.user.id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.translationService.findOne(+id);

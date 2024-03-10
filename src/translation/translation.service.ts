@@ -19,6 +19,7 @@ import {
   TranslationDto,
 } from './dto/translation.dto';
 import { UsersService } from 'src/users/users.service';
+import { Order } from 'src/shared/enums/order.enum';
 
 type TransRowType = {
   ede_text: string;
@@ -271,8 +272,22 @@ export class TranslationService {
     return result;
   }
 
+  async getRecentUpdatedTrans(editorId: number) {
+    const result = await this.transRepository.find({
+      where: {
+        updatedBy: editorId,
+      },
+      order: {
+        updatedAt: Order.DESC,
+      },
+      take: 5,
+    });
+
+    return result;
+  }
+
   findOne(id: number) {
-    return `This action returns a #${id} translation`;
+    return this.transRepository.findOneBy({ id });
   }
 
   async update(
