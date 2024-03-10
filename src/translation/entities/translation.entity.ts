@@ -1,7 +1,10 @@
+import { User } from 'src/users/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -23,6 +26,10 @@ export class Translation {
   @Column({ default: false })
   correct: boolean;
 
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'created_by' })
+  createdByUser: User;
+
   @Column({ name: 'created_by' })
   createdBy: number;
 
@@ -30,6 +37,10 @@ export class Translation {
     name: 'created_at',
   })
   createdAt: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'updated_by' })
+  updatedByUser: User;
 
   @Column({ name: 'updated_by' })
   updatedBy: number;

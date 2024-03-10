@@ -20,6 +20,12 @@ export class UsersController {
     return result;
   }
 
+  @Roles(ERole.Admin)
+  @Get('/editors')
+  async getAllEditors() {
+    return await this.userService.getEditors();
+  }
+
   @Get('/check')
   async checkUser(@Req() req: Request) {
     return await this.userService.check(req.user.id);

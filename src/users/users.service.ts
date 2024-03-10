@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './users.dto';
 import * as bcrypt from 'bcrypt';
 import { saltOrRounds } from 'src/shared/constants';
+import { ERole } from 'src/shared/enums/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -27,6 +28,10 @@ export class UsersService {
 
   async findOne(username: string): Promise<User | null> {
     return this.usersRepository.findOneBy({ username });
+  }
+
+  async getEditors() {
+    return this.usersRepository.findBy({ role: ERole.Editor });
   }
 
   async check(userId: number) {

@@ -5,13 +5,20 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
+import * as moment from 'moment';
 import { CreateTranslationDto } from './dto/create-translation.dto';
 import { UpdateTranslationDto } from './dto/update-translation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Translation } from './entities/translation.entity';
 import { Repository } from 'typeorm';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/shared/dto/page.dto';
-import { AmountStatisticDto, TranslationDto } from './dto/translation.dto';
+import {
+  AmountStatisticDto,
+  EditorStatisticDto,
+  StatisticByMonthDto,
+  TranslationDto,
+} from './dto/translation.dto';
+import { UsersService } from 'src/users/users.service';
 
 type TransRowType = {
   ede_text: string;
@@ -25,6 +32,7 @@ export class TranslationService {
   constructor(
     @InjectRepository(Translation)
     private transRepository: Repository<Translation>,
+    private readonly userService: UsersService,
   ) {}
 
   private readonly logger = new Logger(TranslationService.name);
@@ -149,6 +157,90 @@ export class TranslationService {
       incorrectTransNum,
       correctTransNum,
       allTransNum,
+    };
+  }
+
+  async getMonthlyEditorResults(
+    dto: StatisticByMonthDto,
+  ): Promise<EditorStatisticDto[]> {
+    const editors = await this.userService.getEditors();
+
+    const result: EditorStatisticDto[] = [];
+
+    for (let i = 0; i < editors.length; i++) {
+      const currentEditor = editors[i];
+      const updatedAmount = await this.transRepository
+        .createQueryBuilder('translation')
+        .where('translation.updatedByUser =:editorId', {
+          editorId: editors[i].id,
+        })
+        .andWhere('translation.correct=true')
+        .andWhere('translation.updatedAt >= :after', {
+          after: moment(dto.date || undefined)
+            .startOf('month')
+            .format('YYYY-MM-DD'),
+        })
+        .andWhere('translation.updatedAt < :before', {
+          before: moment(dto.date || undefined)
+            .endOf('month')
+            .add(1, 'days')
+            .format('YYYY-MM-DD'),
+        })
+        .getCount();
+
+      result.push({
+        editor: {
+          id: currentEditor.id,
+          username: currentEditor.username,
+          role: currentEditor.role,
+        },
+        editedSentenceCount: updatedAmount,
+      });
+    }
+
+    return result;
+  }
+
+  async getAllTimeEditorResults(): Promise<EditorStatisticDto[]> {
+    const editors = await this.userService.getEditors();
+
+    const result: EditorStatisticDto[] = [];
+
+    for (let i = 0; i < editors.length; i++) {
+      const currentEditor = editors[i];
+      const updatedAmount = await this.transRepository
+        .createQueryBuilder('translation')
+        .where('translation.updatedByUser =:editorId', {
+          editorId: editors[i].id,
+        })
+        .andWhere('translation.correct=true')
+        .getCount();
+
+      result.push({
+        editor: {
+          id: currentEditor.id,
+          username: currentEditor.username,
+          role: currentEditor.role,
+        },
+        editedSentenceCount: updatedAmount,
+      });
+    }
+
+    return result;
+  }
+
+  async getMonthlyCorrectTransCount(dto: StatisticByMonthDto) {
+    const editorResults = await this.getMonthlyEditorResults(dto);
+
+    const monthlyCount = editorResults.reduce(
+      (accumulator, currentValue) =>
+        accumulator + currentValue.editedSentenceCount,
+      0,
+    );
+
+    return {
+      editors: editorResults,
+      total: monthlyCount,
     };
   }
 

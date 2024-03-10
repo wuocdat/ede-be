@@ -18,3 +18,14 @@ export class CreateUserDto {
   @IsOptional()
   role?: ERole;
 }
+
+export class UserDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  username: string;
+
+  @ApiProperty()
+  role: ERole;
+}

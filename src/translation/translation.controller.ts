@@ -22,7 +22,12 @@ import { Roles } from 'src/shared/decorator/roles.decorator';
 import { ERole } from 'src/shared/enums/roles.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PageDto, PageOptionsDto } from 'src/shared/dto/page.dto';
-import { AmountStatisticDto, TranslationDto } from './dto/translation.dto';
+import {
+  AmountStatisticDto,
+  EditorStatisticDto,
+  StatisticByMonthDto,
+  TranslationDto,
+} from './dto/translation.dto';
 
 @ApiTags('Translation')
 @ApiBearerAuth()
@@ -113,6 +118,27 @@ export class TranslationController {
   @Get('/amount-statistic')
   async getAmountStatistic(): Promise<AmountStatisticDto> {
     return this.translationService.getAmountStatistic();
+  }
+
+  @Get('/monthly-editor-statistic')
+  async getMonthlyEditorStatistic(
+    @Query() statisticByMonthDto: StatisticByMonthDto,
+  ): Promise<EditorStatisticDto[]> {
+    return this.translationService.getMonthlyEditorResults(statisticByMonthDto);
+  }
+
+  @Get('/all-time-editor-statistic')
+  async getAllTimeEditorStatistic(): Promise<EditorStatisticDto[]> {
+    return this.translationService.getAllTimeEditorResults();
+  }
+
+  @Get('/monthly-correct-statistic')
+  async getMonthlyCorrectTransStatistic(
+    @Query() statisticByMonthDto: StatisticByMonthDto,
+  ) {
+    return this.translationService.getMonthlyCorrectTransCount(
+      statisticByMonthDto,
+    );
   }
 
   @Get(':id')
