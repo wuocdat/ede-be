@@ -15,6 +15,7 @@ import { PageDto, PageMetaDto, PageOptionsDto } from 'src/shared/dto/page.dto';
 import {
   AmountStatisticDto,
   EditorStatisticDto,
+  FindTransOptionDto,
   StatisticByMonthDto,
   TranslationDto,
 } from './dto/translation.dto';
@@ -288,6 +289,32 @@ export class TranslationService {
 
   findOne(id: number) {
     return this.transRepository.findOneBy({ id });
+  }
+
+  async findTransWithOption(dto: FindTransOptionDto, userId: number) {
+    const queryBuilder = this.transRepository
+      .createQueryBuilder('translation')
+      .where('translation.updatedByUser =:userId', { userId })
+      .andWhere('translation.updatedAt >= :after', {
+        after: moment(dto.start).format('YYYY-MM-DD'),
+      })
+      .andWhere('translation.updatedAt < :before', {
+        before: moment(dto.end).add(1, 'days').format('YYYY-MM-DD'),
+      });
+
+    if (dto.text) {
+      queryBuilder.andWhere(
+        `translation.vi_text ilike :text OR translation.ede_text 
+        ilike :text OR translation.correct_ede_text ilike :text`,
+        { text: `%${dto.text}%` },
+      );
+    }
+
+    const result = queryBuilder
+      .orderBy('translation.updatedAt', Order.DESC)
+      .getManyAndCount();
+
+    return result;
   }
 
   async update(

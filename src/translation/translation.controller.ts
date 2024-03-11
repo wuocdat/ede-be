@@ -25,6 +25,7 @@ import { PageDto, PageOptionsDto } from 'src/shared/dto/page.dto';
 import {
   AmountStatisticDto,
   EditorStatisticDto,
+  FindTransOptionDto,
   StatisticByMonthDto,
   TranslationDto,
 } from './dto/translation.dto';
@@ -149,6 +150,11 @@ export class TranslationController {
   @Get('/recent-updated-trans')
   async getRecentUpdatedTrans(@Req() req: Request) {
     return this.translationService.getRecentUpdatedTrans(req.user.id);
+  }
+
+  @Get('/get-trans-with-options')
+  findTransWithOptions(@Query() dto: FindTransOptionDto, @Req() req: Request) {
+    return this.translationService.findTransWithOption(dto, req.user.id);
   }
 
   @Get(':id')

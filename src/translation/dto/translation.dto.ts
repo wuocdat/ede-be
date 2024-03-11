@@ -1,5 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { UserDto } from 'src/users/users.dto';
 
 export class TranslationDto {
@@ -55,4 +60,21 @@ export class StatisticByMonthDto {
   @IsDateString()
   @IsOptional()
   date?: string;
+}
+
+export class FindTransOptionDto {
+  @ApiProperty({ default: '2024-01-09' })
+  @IsDateString()
+  @IsNotEmpty()
+  start: string;
+
+  @ApiProperty({ default: '2024-03-09' })
+  @IsDateString()
+  @IsNotEmpty()
+  end: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  text?: string;
 }
