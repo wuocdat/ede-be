@@ -35,7 +35,7 @@ import {
 @ApiBearerAuth()
 @Controller('translation')
 export class TranslationController {
-  constructor(private readonly translationService: TranslationService) { }
+  constructor(private readonly translationService: TranslationService) {}
 
   @Roles(ERole.Admin)
   @Post()
@@ -112,7 +112,10 @@ export class TranslationController {
     files: Array<Express.Multer.File>,
     @Req() req: Request,
   ) {
-    return await this.translationService.parseMultipleExcelFile(files, req.user.id);
+    return await this.translationService.parseMultipleExcelFile(
+      files,
+      req.user.id,
+    );
   }
 
   @Roles(ERole.Admin)
@@ -189,8 +192,16 @@ export class TranslationController {
   }
 
   @Get('/get-trans-with-options')
-  findTransWithOptions(@Query() dto: FindTransOptionDto, @Req() req: Request) {
-    return this.translationService.findTransWithOption(dto, req.user.id);
+  findTransWithOptions(
+    @Query() dto: FindTransOptionDto,
+    @Req() req: Request,
+    @Query() pageOptionsDto: PageOptionsDto,
+  ) {
+    return this.translationService.findTransWithOption(
+      dto,
+      req.user.id,
+      pageOptionsDto,
+    );
   }
 
   @Get(':id')

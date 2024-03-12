@@ -36,7 +36,7 @@ export class TranslationService {
     @InjectRepository(Translation)
     private transRepository: Repository<Translation>,
     private readonly userService: UsersService,
-  ) { }
+  ) {}
 
   private readonly logger = new Logger(TranslationService.name);
 
@@ -79,7 +79,8 @@ export class TranslationService {
     const worksheet = workbook.worksheets[0];
     const parseTransList: TransRowType[] = [];
     worksheet.eachRow(function (row, rowNumber) {
-      if (rowNumber > 0) {  // > 1 with header
+      if (rowNumber > 0) {
+        // > 1 with header
         parseTransList.push({
           ede_text: row.getCell(1).value?.toString() || '',
           vi_text: row.getCell(2).value?.toString() || '',
@@ -99,12 +100,10 @@ export class TranslationService {
   }
 
   async parseMultipleExcelFile(files: Express.Multer.File[], userId: number) {
-    console.log(files);
-
     const result: ParseMultipleExcelFileResDto = {
       savedTransNum: 0,
-      filesNameList: []
-    }
+      filesNameList: [],
+    };
 
     for (let i = 0; i < files.length; i++) {
       try {
@@ -314,7 +313,11 @@ export class TranslationService {
     return this.transRepository.findOneBy({ id });
   }
 
-  async findTransWithOption(dto: FindTransOptionDto, userId: number) {
+  async findTransWithOption(
+    dto: FindTransOptionDto,
+    userId: number,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<TranslationDto>> {
     const queryBuilder = this.transRepository
       .createQueryBuilder('translation')
       .where('translation.updatedByUser =:userId', { userId })
@@ -333,11 +336,17 @@ export class TranslationService {
       );
     }
 
-    const result = queryBuilder
+    queryBuilder
       .orderBy('translation.updatedAt', Order.DESC)
-      .getManyAndCount();
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
 
-    return result;
+    const itemCount = await queryBuilder.getCount();
+    const { entities } = await queryBuilder.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({ pageOptionsDto, itemCount });
+
+    return new PageDto(entities, pageMetaDto);
   }
 
   async update(
