@@ -78,3 +78,12 @@ export class FindTransOptionDto {
   @IsOptional()
   text?: string;
 }
+
+export class ParseMultipleExcelFileResDto {
+  @ApiProperty()
+  savedTransNum: number;
+
+  @ApiProperty()
+  filesNameList: string[];
+
+}

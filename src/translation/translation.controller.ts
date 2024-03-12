@@ -12,6 +12,7 @@ import {
   ParseFilePipe,
   FileTypeValidator,
   Query,
+  UploadedFiles,
 } from '@nestjs/common';
 import { TranslationService } from './translation.service';
 import { CreateTranslationDto } from './dto/create-translation.dto';
@@ -20,7 +21,7 @@ import { Request } from 'src/shared/types/request-with-user';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/shared/decorator/roles.decorator';
 import { ERole } from 'src/shared/enums/roles.enum';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { PageDto, PageOptionsDto } from 'src/shared/dto/page.dto';
 import {
   AmountStatisticDto,
@@ -34,7 +35,7 @@ import {
 @ApiBearerAuth()
 @Controller('translation')
 export class TranslationController {
-  constructor(private readonly translationService: TranslationService) {}
+  constructor(private readonly translationService: TranslationService) { }
 
   @Roles(ERole.Admin)
   @Post()
@@ -77,6 +78,41 @@ export class TranslationController {
     @Req() req: Request,
   ) {
     return await this.translationService.parseExcelFile(file, req.user.id);
+  }
+
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array', // 👈  array of files
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  @ApiConsumes('multipart/form-data')
+  @Roles(ERole.Admin)
+  @Post('upload-multiple-files')
+  @UseInterceptors(FilesInterceptor('files'))
+  async parseMultipleFiles(
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType:
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          }),
+        ],
+      }),
+    )
+    files: Array<Express.Multer.File>,
+    @Req() req: Request,
+  ) {
+    return await this.translationService.parseMultipleExcelFile(files, req.user.id);
   }
 
   @Roles(ERole.Admin)

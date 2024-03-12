@@ -16,6 +16,7 @@ import {
   AmountStatisticDto,
   EditorStatisticDto,
   FindTransOptionDto,
+  ParseMultipleExcelFileResDto,
   StatisticByMonthDto,
   TranslationDto,
 } from './dto/translation.dto';
@@ -35,7 +36,7 @@ export class TranslationService {
     @InjectRepository(Translation)
     private transRepository: Repository<Translation>,
     private readonly userService: UsersService,
-  ) {}
+  ) { }
 
   private readonly logger = new Logger(TranslationService.name);
 
@@ -78,7 +79,7 @@ export class TranslationService {
     const worksheet = workbook.worksheets[0];
     const parseTransList: TransRowType[] = [];
     worksheet.eachRow(function (row, rowNumber) {
-      if (rowNumber > 1) {
+      if (rowNumber > 0) {  // > 1 with header
         parseTransList.push({
           ede_text: row.getCell(1).value?.toString() || '',
           vi_text: row.getCell(2).value?.toString() || '',
@@ -95,6 +96,28 @@ export class TranslationService {
       throw new BadRequestException('File không đúng định dạng hoặc rỗng.');
 
     return await this.createMultipleTrans(parseTransList, userId);
+  }
+
+  async parseMultipleExcelFile(files: Express.Multer.File[], userId: number) {
+    console.log(files);
+
+    const result: ParseMultipleExcelFileResDto = {
+      savedTransNum: 0,
+      filesNameList: []
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      try {
+        const { savedTransNum } = await this.parseExcelFile(files[i], userId);
+
+        result.savedTransNum += savedTransNum;
+        result.filesNameList.push(files[i].originalname);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    return result;
   }
 
   async findIncorrectTrans() {
