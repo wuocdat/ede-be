@@ -4,6 +4,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import * as moment from 'moment';
 import { CreateTranslationDto } from './dto/create-translation.dto';
@@ -119,8 +120,15 @@ export class TranslationService {
     return result;
   }
 
-  async findIncorrectTrans() {
+  async findIncorrectTrans(): Promise<{ trans: Translation }> {
     const result = await this.transRepository.findOneBy({ correct: false });
+
+    if (!result) throw new NotFoundException('Không còn bản dịch nào');
+
+    if (!result.correct_ede_text && !result.ede_text && !result.vi_text) {
+      const { affected } = await this.transRepository.delete(result.id);
+      if (affected) return this.findIncorrectTrans();
+    }
 
     return {
       trans: result,
@@ -365,6 +373,6 @@ export class TranslationService {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} translation`;
+    return this.transRepository.delete(id);
   }
 }
